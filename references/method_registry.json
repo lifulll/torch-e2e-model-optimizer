@@ -1,0 +1,67 @@
+{
+  "methods": [
+    {
+      "id": "model-remove-side-effects",
+      "layer": "model_code",
+      "triggers": ["graph_breaks", "cpu_gap", "host_sync"],
+      "evidence": ["TORCH_LOGS=graph_breaks", "profiler CPU timeline"],
+      "risk": "low"
+    },
+    {
+      "id": "model-stabilize-shapes",
+      "layer": "model_code",
+      "triggers": ["recompiles", "dynamic_shape_churn"],
+      "evidence": ["TORCH_LOGS=recompiles,dynamic"],
+      "risk": "medium"
+    },
+    {
+      "id": "runtime-amp",
+      "layer": "pytorch_runtime",
+      "triggers": ["matmul_bound", "conv_bound", "attention_bound"],
+      "evidence": ["profiler top kernels", "correctness tolerance"],
+      "risk": "medium"
+    },
+    {
+      "id": "compile-mode",
+      "layer": "torch_compile",
+      "triggers": ["launch_overhead", "weak_compile_speedup", "autotune_candidate"],
+      "evidence": ["compile time", "steady state E2E"],
+      "risk": "low"
+    },
+    {
+      "id": "compile-recompile",
+      "layer": "torch_compile",
+      "triggers": ["guard_failures", "shape_churn", "changing_python_constants"],
+      "evidence": ["TORCH_LOGS=recompiles"],
+      "risk": "medium"
+    },
+    {
+      "id": "backward-optimizer",
+      "layer": "aot_backward",
+      "triggers": ["backward_dominates", "optimizer_dominates"],
+      "evidence": ["profiler step breakdown"],
+      "risk": "medium"
+    },
+    {
+      "id": "inductor-fusion",
+      "layer": "inductor",
+      "triggers": ["many_small_kernels", "over_fused_kernel"],
+      "evidence": ["TORCH_LOGS=fusion,schedule", "generated code"],
+      "risk": "medium"
+    },
+    {
+      "id": "triton-hotspot",
+      "layer": "triton_kernel",
+      "triggers": ["single_generated_kernel_hotspot"],
+      "evidence": ["profiler top kernel", "generated Triton source"],
+      "risk": "high"
+    },
+    {
+      "id": "custom-kernel",
+      "layer": "escape_hatch",
+      "triggers": ["stable_hotspot", "generated_kernel_exhausted"],
+      "evidence": ["microbench", "E2E benchmark", "correctness test"],
+      "risk": "high"
+    }
+  ]
+}

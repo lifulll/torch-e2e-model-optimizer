@@ -1,0 +1,4 @@
+interface:
+  display_name: "Torch E2E Model Optimizer"
+  short_description: "Optimize torch.compile training and inference end to end."
+  default_prompt: "Optimize this PyTorch model end to end from model code through torch.compile, Inductor, and Triton kernels, recording each iteration's evidence, code changes, and speedup."

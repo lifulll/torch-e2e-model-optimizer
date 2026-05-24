@@ -1,0 +1,86 @@
+#!/usr/bin/env python3
+"""Create the report scaffold for a torch E2E optimization run."""
+
+from __future__ import annotations
+
+import argparse
+import json
+from datetime import datetime
+from pathlib import Path
+
+
+STEP_FILES = [
+    "step01_model_code.md",
+    "step02_pytorch_runtime.md",
+    "step03_compile_dynamo.md",
+    "step04_aot_backward.md",
+    "step05_inductor.md",
+    "step06_triton_kernel.md",
+    "step07_custom_kernel.md",
+]
+
+
+TABLE_HEADER = """| Iter | Layer | Hypothesis | Code/config changed | Files changed | Correctness | E2E metric before | E2E metric after | Delta | Retained | Evidence |
+|---:|---|---|---|---|---|---:|---:|---:|---|---|
+"""
+
+
+def write_if_missing(path: Path, text: str) -> None:
+    if not path.exists():
+        path.write_text(text, encoding="utf-8")
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--root", default=".", help="Directory in which to create the run directory")
+    parser.add_argument("--name", default=None, help="Run directory name; default uses timestamp")
+    parser.add_argument("--entry-cmd", default="", help="Benchmark or training command")
+    parser.add_argument("--objective", default="", help="Primary optimization objective")
+    parser.add_argument("--env-json", default=None, help="Optional env.json to copy into state")
+    args = parser.parse_args()
+
+    stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    run_dir = Path(args.root) / (args.name or f"torch_e2e_opt_{stamp}")
+    for subdir in [
+        run_dir,
+        run_dir / "artifacts" / "profiler",
+        run_dir / "artifacts" / "torch_logs",
+        run_dir / "artifacts" / "traces",
+        run_dir / "artifacts" / "generated_code",
+        run_dir / "patches",
+    ]:
+        subdir.mkdir(parents=True, exist_ok=True)
+
+    env = None
+    if args.env_json:
+        env_path = Path(args.env_json)
+        if env_path.exists():
+            env = json.loads(env_path.read_text(encoding="utf-8"))
+            (run_dir / "env.json").write_text(json.dumps(env, indent=2, sort_keys=True), encoding="utf-8")
+
+    state = {
+        "created_at": stamp,
+        "entry_cmd": args.entry_cmd,
+        "objective": args.objective,
+        "iterations": [],
+        "best": None,
+        "env": env,
+    }
+    write_if_missing(run_dir / "state.json", json.dumps(state, indent=2, sort_keys=True) + "\n")
+    write_if_missing(run_dir / "env.md", "# Environment\n\nFill from `scripts/collect_env.py`.\n")
+    write_if_missing(
+        run_dir / "baseline.md",
+        "# Baseline\n\n- Entry command: `" + args.entry_cmd + "`\n- Objective: " + args.objective + "\n",
+    )
+    write_if_missing(run_dir / "iteration_table.md", TABLE_HEADER)
+    write_if_missing(run_dir / "final_summary.md", "# Final Summary\n\nNot finalized yet.\n")
+    for step in STEP_FILES:
+        title = step.removesuffix(".md").replace("_", " ").title()
+        write_if_missing(run_dir / step, f"# {title}\n\nNo retained change recorded yet.\n")
+
+    print(run_dir)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
