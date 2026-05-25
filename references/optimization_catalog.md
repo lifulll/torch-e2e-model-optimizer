@@ -16,8 +16,8 @@ Use this catalog to select the next optimization method from measured evidence. 
 | compile-mode | torch.compile | Warm path may benefit from mode changes | Compare default, `reduce-overhead`, `max-autotune` one at a time | Compile time or memory budget forbids it | steady-state and compile-time table |
 | compile-graph-break | torch.compile | Graph breaks split hot path | Rewrite unsupported Python into tensor ops or isolate disabled region | Unsupported op is cold | graph break log |
 | compile-recompile | torch.compile | Guards repeatedly fail | Stabilize shape, dtype, stride, Python constants, module state; use precise `mark_dynamic` | True dynamic workload makes specialization impossible | recompile log |
-| backward-optimizer | AOT/backward | Optimizer or backward dominates step | Try fused/foreach optimizer, compile optimizer, checkpointing, accumulation | Optimizer is not a bottleneck | profiler step breakdown |
-| distributed-overlap | distributed | Scaling efficiency poor | Tune bucket size, accumulation, overlap, sharding, rank balance | Single-rank bottleneck not understood | rank traces and comm timings |
+| backward-optimizer | AOT/backward | Optimizer or backward dominates step | Try fused/foreach optimizer, compile optimizer, and activation checkpointing | Optimizer is not a bottleneck | profiler step breakdown |
+| distributed-overlap | distributed | Scaling efficiency poor | Tune communication bucket size, overlap, sharding, and rank balance without changing effective batch size | Single-rank bottleneck not understood | rank traces and comm timings |
 | inductor-fusion | Inductor | Too many small kernels or over-fused slow kernel | Adjust expression boundaries to improve fusion or split over-fused group | E2E bottleneck is elsewhere | schedule/fusion logs |
 | inductor-layout | Inductor | Generated code has expensive index math or copies | Change layout/stride at model boundaries or targeted `.contiguous()` | Copy is more expensive than saved kernel time | generated code and profiler |
 | inductor-autotune | Inductor | Matmul/conv/reduction kernel config looks weak | Try compile mode/config supported by current PyTorch | Internal option not present or unstable | output code and selected config |
@@ -27,10 +27,11 @@ Use this catalog to select the next optimization method from measured evidence. 
 ## Combining Rules
 
 - Keep precision and batch size fixed for attribution. Do not select AMP/mixed precision, batch-size sweeps, or microbatch sweeps as optimization methods unless explicitly requested by the user.
+- Prefer candidates with plausible E2E impact of at least 2%. Skip smaller cleanups unless they unlock a larger retained change.
 - Do not combine compile mode changes with model rewrites in the same attribution iteration.
 - Do not tune Triton or add pass-inserted custom kernels before graph breaks and recompilation are under control.
 - If a change improves kernel time but not E2E time, keep it only when it is required for a later retained change.
 
 ## No-Gain Interpretation
 
-Treat an iteration as no-gain when the primary E2E metric improves less than the measured noise threshold, usually 1-2%, or when the improvement is not reproducible. Two consecutive no-gain iterations should trigger a deeper bottleneck re-check or stopping summary.
+Treat an iteration as no-gain when the primary E2E metric improves less than the materiality threshold, or when the improvement is not reproducible. The default threshold is 2% E2E gain; raise it when measured benchmark noise is larger. Two consecutive no-gain iterations should trigger a deeper bottleneck re-check or stopping summary.

@@ -5,7 +5,10 @@
 - Baseline:
 - Final:
 - Total E2E improvement:
+- Cleanup command:
 - Correctness:
+- Sub-threshold iterations:
+- Consecutive no-gain iterations at end:
 - Stop reason:
 
 ## Iterations

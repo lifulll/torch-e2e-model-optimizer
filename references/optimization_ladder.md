@@ -1,6 +1,8 @@
 # Optimization Ladder
 
-Use this reference for the detailed step order. Do not enter the next step until the current step has no remaining plausible optimization point, unless profiler evidence directly identifies a deeper compiler or kernel bottleneck.
+Use this reference for the detailed step order. Do not enter the next step until the current step has no remaining material optimization point, unless profiler evidence directly identifies a deeper compiler or kernel bottleneck.
+
+A material optimization point is expected to improve the primary end-to-end metric by at least 2%, or by more than the measured benchmark noise when noise is larger than 2%. Do not pursue sub-threshold cleanups unless they unblock a larger optimization.
 
 ## Step 0: Baseline and Environment
 
@@ -43,7 +45,6 @@ Write `step02_pytorch_runtime.md`.
 Optimize framework-level execution:
 
 - use `torch.inference_mode()` or `torch.no_grad()` for inference,
-- set `torch.set_float32_matmul_precision("high")` for matmul-heavy workloads when appropriate,
 - try channels-last for convolutional vision models,
 - use `optimizer.zero_grad(set_to_none=True)`,
 - try fused or foreach optimizers when supported,
@@ -81,7 +82,7 @@ Use this step for training or fine-tuning:
 - profile backward separately from forward,
 - identify AOTAutograd-generated graph behavior,
 - check optimizer step and gradient synchronization cost,
-- evaluate fused optimizers, foreach variants, compiled optimizer step, activation checkpointing, and gradient accumulation,
+- evaluate fused optimizers, foreach variants, compiled optimizer step, and activation checkpointing,
 - for DDP/FSDP/ZeRO, measure rank skew, communication overlap, bucket sizing, sharding effects, and scaling efficiency,
 - distinguish memory-saving changes from speed changes.
 
@@ -161,3 +162,5 @@ For every pass-inserted custom kernel:
 - document supported shapes, dtypes, layouts, devices, and fallback behavior.
 
 Load `inductor_triton_hop_development_flow.md` before implementing this step. Consider a new lowering only when the replacement is not a normal Triton kernel launch or requires new IR/scheduler behavior.
+
+For pass correctness and performance attribution, copy `templates/inductor_pass_compile_test_template.py` and replace the monkeypatch contexts so the same compiled model code can run with the pass disabled and enabled.

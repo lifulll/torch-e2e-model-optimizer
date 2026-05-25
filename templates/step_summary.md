@@ -12,6 +12,9 @@
 # benchmark/profile commands
 ```
 
+- Cleanup command:
+- Cleanup result:
+
 ## Changes
 
 | File | Change | Reason |
@@ -41,4 +44,5 @@
 ## Decision
 
 - Retained/reverted/optional:
+- Skipped sub-threshold ideas:
 - Next bottleneck:

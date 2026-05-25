@@ -43,7 +43,7 @@ Each branch must record:
 
 Keep the fastest correct branch only when:
 
-1. improvement exceeds the noise threshold,
+1. improvement exceeds the materiality threshold, normally at least 2% E2E gain and above benchmark noise,
 2. it improves the primary E2E metric,
 3. secondary costs are acceptable,
 4. the reason is explainable by logs, profiler evidence, or generated code.

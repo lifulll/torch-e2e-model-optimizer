@@ -23,6 +23,17 @@ def calc_delta(before: float, after: float, direction: str) -> float:
     raise ValueError(f"unknown direction: {direction}")
 
 
+def is_better(current: dict[str, object], best: dict[str, object] | None) -> bool:
+    if best is None:
+        return True
+    if current.get("direction") == best.get("direction") and current.get("unit") == best.get("unit"):
+        if current.get("direction") in {"throughput", "higher-is-better"}:
+            return float(current.get("after", 0.0)) > float(best.get("after", 0.0))
+        if current.get("direction") in {"latency", "lower-is-better"}:
+            return float(current.get("after", 0.0)) < float(best.get("after", float("inf")))
+    return float(current.get("delta_percent", 0.0)) > float(best.get("delta_percent", -1e9))
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--run-dir", required=True)
@@ -42,10 +53,14 @@ def main() -> int:
     )
     parser.add_argument("--retained", default="unknown", choices=["yes", "no", "optional", "unknown"])
     parser.add_argument("--evidence", default="")
+    parser.add_argument("--materiality-threshold", default=2.0, type=float)
+    parser.add_argument("--noise-percent", default=0.0, type=float)
     args = parser.parse_args()
 
     run_dir = Path(args.run_dir)
     delta = calc_delta(args.before, args.after, args.direction)
+    effective_threshold = max(args.materiality_threshold, args.noise_percent)
+    material = delta >= effective_threshold
     before_text = f"{args.before:g} {args.unit}".strip()
     after_text = f"{args.after:g} {args.unit}".strip()
     row = (
@@ -67,29 +82,32 @@ def main() -> int:
     state = {}
     if state_path.exists():
         state = json.loads(state_path.read_text(encoding="utf-8"))
-    state.setdefault("iterations", []).append(
-        {
-            "iter": args.iter,
-            "layer": args.layer,
-            "hypothesis": args.hypothesis,
-            "changed": args.changed,
-            "files": args.files,
-            "correctness": args.correctness,
-            "before": args.before,
-            "after": args.after,
-            "unit": args.unit,
-            "direction": args.direction,
-            "delta_percent": delta,
-            "retained": args.retained,
-            "evidence": args.evidence,
-        }
-    )
+    iteration = {
+        "iter": args.iter,
+        "layer": args.layer,
+        "hypothesis": args.hypothesis,
+        "changed": args.changed,
+        "files": args.files,
+        "correctness": args.correctness,
+        "before": args.before,
+        "after": args.after,
+        "unit": args.unit,
+        "direction": args.direction,
+        "delta_percent": delta,
+        "materiality_threshold_percent": args.materiality_threshold,
+        "noise_percent": args.noise_percent,
+        "effective_threshold_percent": effective_threshold,
+        "material": material,
+        "retained": args.retained,
+        "evidence": args.evidence,
+    }
+    state.setdefault("iterations", []).append(iteration)
     if args.retained == "yes":
-        best = state.get("best")
-        if best is None or delta >= float(best.get("delta_percent", -1e9)):
-            state["best"] = state["iterations"][-1]
+        if is_better(iteration, state.get("best")):
+            state["best"] = iteration
     state_path.write_text(json.dumps(state, indent=2, sort_keys=True) + "\n", encoding="utf-8")
-    print(f"{delta:+.2f}%")
+    suffix = "material" if material else "sub-threshold"
+    print(f"{delta:+.2f}% ({suffix}, threshold={effective_threshold:.2f}%)")
     return 0
 
 

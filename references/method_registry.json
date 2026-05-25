@@ -15,11 +15,53 @@
       "risk": "medium"
     },
     {
+      "id": "model-rewrite-op-chain",
+      "layer": "model_code",
+      "triggers": ["many_tiny_pointwise_ops", "poor_fusion"],
+      "evidence": ["profiler", "generated code"],
+      "risk": "medium"
+    },
+    {
+      "id": "model-layout-cleanup",
+      "layer": "model_code",
+      "triggers": ["hidden_copies", "bad_stride", "transpose_heavy_path"],
+      "evidence": ["profiler memory ops", "tensor stride audit"],
+      "risk": "medium"
+    },
+    {
+      "id": "runtime-inference-mode",
+      "layer": "pytorch_runtime",
+      "triggers": ["inference_autograd_overhead"],
+      "evidence": ["profiler autograd events"],
+      "risk": "low"
+    },
+    {
+      "id": "runtime-dataloader",
+      "layer": "pytorch_runtime",
+      "triggers": ["accelerator_idle_before_compute", "slow_preprocessing"],
+      "evidence": ["profiler gaps", "data timing"],
+      "risk": "medium"
+    },
+    {
+      "id": "compile-region",
+      "layer": "torch_compile",
+      "triggers": ["compiled_coverage_too_small", "compiled_scope_unstable"],
+      "evidence": ["graph coverage", "module coverage"],
+      "risk": "medium"
+    },
+    {
       "id": "compile-mode",
       "layer": "torch_compile",
       "triggers": ["launch_overhead", "weak_compile_speedup", "autotune_candidate"],
       "evidence": ["compile time", "steady state E2E"],
       "risk": "low"
+    },
+    {
+      "id": "compile-graph-break",
+      "layer": "torch_compile",
+      "triggers": ["graph_breaks", "hot_path_split"],
+      "evidence": ["graph break log"],
+      "risk": "medium"
     },
     {
       "id": "compile-recompile",
@@ -36,10 +78,31 @@
       "risk": "medium"
     },
     {
+      "id": "distributed-overlap",
+      "layer": "distributed",
+      "triggers": ["poor_scaling_efficiency", "communication_exposed", "rank_skew"],
+      "evidence": ["rank traces", "communication timings"],
+      "risk": "high"
+    },
+    {
       "id": "inductor-fusion",
       "layer": "inductor",
       "triggers": ["many_small_kernels", "over_fused_kernel"],
       "evidence": ["TORCH_LOGS=fusion,schedule", "generated code"],
+      "risk": "medium"
+    },
+    {
+      "id": "inductor-layout",
+      "layer": "inductor",
+      "triggers": ["expensive_index_math", "generated_copies", "bad_stride"],
+      "evidence": ["generated code", "profiler"],
+      "risk": "medium"
+    },
+    {
+      "id": "inductor-autotune",
+      "layer": "inductor",
+      "triggers": ["weak_matmul_conv_reduction_config"],
+      "evidence": ["output code", "selected config"],
       "risk": "medium"
     },
     {
