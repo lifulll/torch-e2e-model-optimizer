@@ -24,11 +24,11 @@ Run the existing benchmark with warmup. Record compile time separately from stea
 
 ```bash
 TORCH_LOGS="graph_breaks,recompiles,dynamic" \
-python train.py --config configs/model.yaml 2>&1 | tee torch_e2e_opt_*/artifacts/torch_logs/baseline_compile.log
+python train.py --config configs/model.yaml 2>&1 | tee run_*/artifacts/torch_logs/baseline_compile.log
 
 python /home/torch-e2e-model-optimizer/scripts/analyze_torch_logs.py \
-  torch_e2e_opt_*/artifacts/torch_logs/baseline_compile.log \
-  --markdown torch_e2e_opt_*/artifacts/torch_logs/baseline_compile_summary.md
+  run_*/artifacts/torch_logs/baseline_compile.log \
+  --markdown run_*/artifacts/torch_logs/baseline_compile_summary.md
 ```
 
 Fill `baseline.md` with:
@@ -51,7 +51,7 @@ If the compile log shows graph breaks from logging or `.item()` in `forward`, fi
 python train.py --config configs/model.yaml
 
 python /home/torch-e2e-model-optimizer/scripts/record_iteration.py \
-  --run-dir torch_e2e_opt_YYYYMMDD_HHMMSS \
+  --run-dir run_YYYYMMDD_HHMMSS \
   --iter 1 \
   --layer model_code \
   --hypothesis "removing scalar sync from compiled path reduces graph breaks" \
@@ -85,7 +85,7 @@ When two consecutive iterations show no material improvement, or a real boundary
 
 ```bash
 python /home/torch-e2e-model-optimizer/scripts/summarize.py \
-  --run-dir torch_e2e_opt_YYYYMMDD_HHMMSS \
+  --run-dir run_YYYYMMDD_HHMMSS \
   --stop-reason "two no-gain iterations; remaining time is dataloader outside requested scope"
 ```
 

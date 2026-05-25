@@ -20,7 +20,7 @@ with profile(
     record_shapes=True,
     profile_memory=True,
     with_stack=False,
-    on_trace_ready=tensorboard_trace_handler("./torch_e2e_opt_trace"),
+    on_trace_ready=tensorboard_trace_handler("./run_trace"),
 ) as prof:
     for step, batch in enumerate(loader_or_inputs):
         run_one_step(batch)

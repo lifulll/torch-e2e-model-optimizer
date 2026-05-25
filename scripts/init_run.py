@@ -40,7 +40,7 @@ def main() -> int:
     args = parser.parse_args()
 
     stamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    run_dir = Path(args.root) / (args.name or f"torch_e2e_opt_{stamp}")
+    run_dir = Path(args.root) / (args.name or f"run_{stamp}")
     for subdir in [
         run_dir,
         run_dir / "artifacts" / "profiler",
