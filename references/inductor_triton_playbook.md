@@ -37,12 +37,6 @@ Save generated files, logs, and traces under the run directory. Link them from `
 4. Use targeted layout fixes only when copy cost is justified.
 5. Add custom Triton only when generated code is a stable E2E bottleneck and fallback/tests are in place.
 
-## Imported Inductor References
+## Pass Development Reference
 
-The following files are migrated from the local `torch-compile-model-optimization` skill for deeper Inductor pass work:
-
-- `inductor_gated_cat_sum_copy_scheduler.py`
-- `inductor_test_gated_cat_sum_copy_real_structure.py`
-- `inductor_mixer_sparse_posfb.py`
-
-Read them only when modifying Inductor passes, scheduler behavior, or real-structure tests. They are not needed for ordinary model-level optimization.
+For pass-level work that replaces an FX subgraph with hand-written Triton kernels, read `inductor_triton_hop_development_flow.md`. It covers the `triton_kernel_wrapper_functional` HOP path, post-grad wiring, rewrite tests, and end-to-end compile validation.

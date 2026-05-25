@@ -11,8 +11,6 @@ Use this catalog to select the next optimization method from measured evidence. 
 | model-rewrite-op-chain | model code | Many tiny pointwise ops or poor fusion | Replace hand-written op chains with PyTorch functional/library ops | Equivalent library op is unavailable or slower | profiler, generated code |
 | model-layout-cleanup | model code | Hidden copies, bad stride, transpose-heavy path | Move layout conversion to boundaries; remove redundant clone/contiguous/permute | Copy cost dominates | profiler memory ops, tensor stride audit |
 | runtime-inference-mode | PyTorch runtime | Inference path includes autograd overhead | Use `torch.inference_mode()` or `torch.no_grad()` | Training or gradients required | profiler autograd events |
-| runtime-amp | PyTorch runtime | Matmul/conv/attention dominated fp32 workload | Try bf16/fp16 autocast or model-native mixed precision | Numerical drift or unsupported kernels | correctness and E2E benchmark |
-| runtime-batch-tune | PyTorch runtime | Accelerator underutilized or latency/throughput tradeoff unknown | Sweep batch, microbatch, sequence bucket, gradient accumulation | User has fixed SLA shape | throughput/latency curve |
 | runtime-dataloader | PyTorch runtime | Accelerator idle before compute | Tune workers, prefetch, pin memory, persistent workers, caching, transforms | Synthetic benchmark already excludes data | profiler gaps and data timing |
 | compile-region | torch.compile | Compiled coverage too small or too broad | Compile stable tensor-heavy region; use regional compile for repeated blocks | Full model compile is already stable and fast | graph/module coverage |
 | compile-mode | torch.compile | Warm path may benefit from mode changes | Compare default, `reduce-overhead`, `max-autotune` one at a time | Compile time or memory budget forbids it | steady-state and compile-time table |
@@ -24,13 +22,13 @@ Use this catalog to select the next optimization method from measured evidence. 
 | inductor-layout | Inductor | Generated code has expensive index math or copies | Change layout/stride at model boundaries or targeted `.contiguous()` | Copy is more expensive than saved kernel time | generated code and profiler |
 | inductor-autotune | Inductor | Matmul/conv/reduction kernel config looks weak | Try compile mode/config supported by current PyTorch | Internal option not present or unstable | output code and selected config |
 | triton-hotspot | Triton | One or few generated Triton kernels dominate | Inspect grid/block/warps/stages/masks/strides; influence generation first | Hotspot is not stable across inputs | profiler and generated kernel |
-| custom-kernel | escape hatch | Generated/library kernel remains proven bottleneck | Add Triton/CUDA/HIP op with fallback and tests | Maintenance cost or shape coverage is unjustified | microbench plus E2E |
+| custom-kernel-pass | Inductor pass | Generated/library kernel remains proven bottleneck and target is a recognizable FX pattern | Insert hand-written Triton kernel through `triton_kernel_wrapper_functional` HOP, with fallback and tests | Maintenance cost, shape coverage, or matcher safety is unjustified | FX rewrite test, generated code, microbench plus E2E |
 
 ## Combining Rules
 
-- Combine AMP with layout and batch tuning only after each is measured alone or the interaction is already known.
+- Keep precision and batch size fixed for attribution. Do not select AMP/mixed precision, batch-size sweeps, or microbatch sweeps as optimization methods unless explicitly requested by the user.
 - Do not combine compile mode changes with model rewrites in the same attribution iteration.
-- Do not tune Triton or custom kernels before graph breaks and recompilation are under control.
+- Do not tune Triton or add pass-inserted custom kernels before graph breaks and recompilation are under control.
 - If a change improves kernel time but not E2E time, keep it only when it is required for a later retained change.
 
 ## No-Gain Interpretation

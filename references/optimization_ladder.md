@@ -34,6 +34,8 @@ Optimize model-level tensor code:
 
 Retain a model-code change only if E2E performance improves and correctness remains aligned.
 
+For local model-code rewrites, copy `templates/model_code_change_compile_test_template.py` and replace the original/rewritten callables. Use it to compare default `torch.compile` accuracy and benchmark timing before retaining the rewrite.
+
 ## Step 2: PyTorch Runtime and Data Path
 
 Write `step02_pytorch_runtime.md`.
@@ -41,7 +43,6 @@ Write `step02_pytorch_runtime.md`.
 Optimize framework-level execution:
 
 - use `torch.inference_mode()` or `torch.no_grad()` for inference,
-- use AMP/bf16/fp16 where numerically valid,
 - set `torch.set_float32_matmul_precision("high")` for matmul-heavy workloads when appropriate,
 - try channels-last for convolutional vision models,
 - use `optimizer.zero_grad(set_to_none=True)`,
@@ -50,6 +51,8 @@ Optimize framework-level execution:
 - remove accidental synchronization from `.item()`, `.cpu()`, printing tensors, or per-step metrics.
 
 Training benchmarks must cover forward, loss, backward, optimizer step, zero grad, data fetch, and synchronization. Inference benchmarks must separate cold compile, warm path, and serving batch behavior.
+
+Keep precision and batch size fixed during this skill's optimization loop. Do not use AMP/mixed-precision changes, batch-size sweeps, or microbatch sweeps as candidate optimization directions unless the user explicitly asks for them.
 
 ## Step 3: torch.compile, Dynamo, and Graph Breaks
 
@@ -67,6 +70,8 @@ Treat `torch.compile` as the default path:
 
 Record graph break count, recompilation count, compile latency, cache behavior, and compiled-region coverage.
 
+Load `compile_modes_shape_strategy.md` when selecting compile mode, CUDA graph strategy, bucketing, `mark_dynamic`, or dynamic-shape policy.
+
 ## Step 4: Backward, Optimizer, and Distributed Path
 
 Write `step04_aot_backward.md`.
@@ -81,6 +86,8 @@ Use this step for training or fine-tuning:
 - distinguish memory-saving changes from speed changes.
 
 Do not accept a change that improves one microphase but worsens total step time.
+
+Load `distributed_compile_guidance.md` for DDP/FSDP wrapping order, selective block compilation, gradient checkpointing, checkpoint boundaries, and distributed validation.
 
 ## Step 5: TorchInductor Scheduling and Generated Code
 
@@ -127,17 +134,30 @@ Inspect grid, block size, num warps, num stages, memory coalescing, stride/index
 
 Prefer influencing Triton generation through model or Inductor-level changes.
 
-## Step 7: Custom Triton/CUDA/HIP Kernel Escape Hatch
+## Step 7: Custom Kernel Through An Inductor Pass
 
 Write `step07_custom_kernel.md` only if this layer is reached.
 
-Use a custom kernel only when all are true:
+The default custom-kernel integration path is an Inductor FX pass that replaces a matched subgraph with one or more hand-written Triton kernels via `torch.ops.higher_order.triton_kernel_wrapper_functional`. Do not add a Python custom op or a new lowering when the HOP path is sufficient.
+
+Use this path only when all are true:
 
 - profiler shows a stable hotspot,
 - correctness contract is clear,
 - PyTorch library ops and model rewrites are insufficient,
 - Inductor scheduling/config options are insufficient,
+- the target can be recognized as a conservative FX pattern,
 - expected E2E gain justifies maintenance cost,
 - fallback implementation remains available.
 
-For every custom kernel, add correctness tests, microbenchmarks, E2E benchmarks, supported-shape documentation, and fallback behavior.
+For every pass-inserted custom kernel:
+
+- write the Triton kernel and validate it independently,
+- write an FX matcher and HOP insertion helper,
+- wire the pass into the correct post-grad location,
+- add FX rewrite tests,
+- add `torch.compile` E2E correctness and performance tests,
+- inspect generated code to confirm the Triton launch path is used,
+- document supported shapes, dtypes, layouts, devices, and fallback behavior.
+
+Load `inductor_triton_hop_development_flow.md` before implementing this step. Consider a new lowering only when the replacement is not a normal Triton kernel launch or requires new IR/scheduler behavior.

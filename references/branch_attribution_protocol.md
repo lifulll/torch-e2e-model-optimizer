@@ -7,13 +7,12 @@ Use this when an optimization layer has multiple plausible implementations and b
 Use branch exploration for:
 
 - compile mode comparisons,
-- batch or microbatch sweeps,
 - dynamic-shape strategy choices,
 - layout variants,
 - dataloader settings,
 - optimizer variants,
 - Inductor fusion boundary rewrites,
-- Triton/custom kernel variants.
+- Triton or pass-inserted custom kernel variants.
 
 Do not use it for trivial one-line fixes with obvious correctness and low benchmark noise.
 

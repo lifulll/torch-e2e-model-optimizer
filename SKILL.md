@@ -9,7 +9,7 @@ Optimize PyTorch training or inference end to end. Assume the workload already u
 
 Primary chain:
 
-`model code -> PyTorch runtime -> torch.compile/TorchDynamo -> AOTAutograd -> TorchInductor -> generated Triton kernel -> custom kernel only if justified`
+`model code -> PyTorch runtime -> torch.compile/TorchDynamo -> AOTAutograd -> TorchInductor -> generated Triton kernel -> Inductor pass-inserted custom kernel only if justified`
 
 Do not finish after one suggestion or one profile. Iterate until no material gain remains, a correctness or engineering boundary is reached, or the user stops the run.
 
@@ -40,7 +40,8 @@ If either required input is missing and cannot be inferred, ask once briefly, th
 - Change one primary variable per iteration, or one controlled branch family.
 - Keep changes only when they improve the primary E2E metric beyond noise and pass correctness checks.
 - Run equivalence tests when changing tensor math, layout, dtype, shape handling, or operator ordering.
-- Prefer framework/configuration changes before model rewrites, and model/PyTorch rewrites before compiler internals or custom kernels.
+- Prefer framework/configuration changes before model rewrites, and model/PyTorch rewrites before compiler internals or pass-inserted custom kernels.
+- Do not use AMP/mixed-precision changes or batch-size/microbatch sweeps as optimization directions for this skill. Keep existing precision and batch size fixed for attribution unless the user explicitly requests otherwise.
 - If running on Hygon DCU, ROCm, HIP, or DTK, also use the relevant Hygon/DCU profiling and kernel optimization skills.
 
 ## Target State
@@ -98,7 +99,7 @@ Use `references/optimization_ladder.md` for step details. The required order is:
 4. Backward, optimizer, and distributed path
 5. TorchInductor scheduling and generated code
 6. Generated Triton kernel analysis
-7. Custom Triton/CUDA/HIP kernel escape hatch
+7. Custom kernel through an Inductor pass
 
 Do not enter the next step until the current step has no remaining plausible optimization point, unless profiler evidence directly identifies a deeper compiler or kernel bottleneck.
 
@@ -110,9 +111,11 @@ Do not enter the next step until the current step has no remaining plausible opt
 - `references/branch_attribution_protocol.md`: load for compile-mode sweeps, batch/layout variants, Inductor boundary variants, or any noisy branch comparison.
 - `references/profiler_playbook.md`: load when timing alone cannot explain the bottleneck.
 - `references/torch_compile_debugging.md`: load for graph breaks, recompilation, dynamic shapes, or compile-mode triage.
+- `references/compile_modes_shape_strategy.md`: load when selecting compile modes, CUDA graph strategy, bucketing, `mark_dynamic`, or dynamic-shape policy.
+- `references/distributed_compile_guidance.md`: load for DDP/FSDP, distributed graph breaks, gradient checkpointing, checkpoint boundaries, or rank-level validation.
 - `references/inductor_triton_playbook.md`: load only when generated code, fusion, layout, or Triton hotspots are implicated.
+- `references/inductor_triton_hop_development_flow.md`: load when replacing an FX subgraph with hand-written Triton kernels through `triton_kernel_wrapper_functional` HOP in the Inductor post-grad pipeline.
 - `references/reporting_contract.md`: load when finalizing or checking output completeness.
-- `references/inductor_*.py`: load only for Inductor pass, scheduler, or real-structure test work.
 
 ## Scripts
 
@@ -121,6 +124,10 @@ Do not enter the next step until the current step has no remaining plausible opt
 - `analyze_torch_logs.py`: summarize `torch.compile` log signals.
 - `record_iteration.py`: append one measured result to `iteration_table.md` and `state.json`.
 - `summarize.py`: generate `final_summary.md`.
+
+## Templates
+
+- `templates/model_code_change_compile_test_template.py`: copy when validating a model-code rewrite such as `a.add(b)` to `a + b`; compares original vs rewritten implementations under default `torch.compile` for accuracy and benchmark timing while keeping precision and batch size fixed.
 
 ## Avoid
 
