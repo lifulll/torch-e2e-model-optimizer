@@ -1,0 +1,54 @@
+digraph G {
+  graph [rankdir=LR, bgcolor=white, pad=0.25, nodesep=0.45, ranksep=0.65, splines=ortho];
+  node [shape=box, style="rounded,filled", fontname="DejaVu Sans", fontsize=13, fillcolor="#EEF5FF", color="#5B7DB1", margin="0.12,0.08"];
+  edge [color="#56606B", arrowsize=0.7, penwidth=1.2];
+  title [label="Source Function Index", shape=box, fillcolor="#233142", fontcolor=white, color="#233142", fontsize=18];
+  title -> "AOTIModelContainerRunner" [style=invis];
+  subgraph cluster_0 {
+    label="entry"; fontname="DejaVu Sans"; fontsize=12; color="#D6E4F0"; style="rounded";
+    "compile_fx.py";
+    "graph.py";
+  }
+  subgraph cluster_1 {
+    label="IR"; fontname="DejaVu Sans"; fontsize=12; color="#D6E4F0"; style="rounded";
+    "lowering.py";
+    "scheduler.py";
+  }
+  subgraph cluster_2 {
+    label="backend"; fontname="DejaVu Sans"; fontsize=12; color="#D6E4F0"; style="rounded";
+    "select_algorithm.py";
+    "codegen/triton.py";
+    "codegen/cpp.py";
+    "codegen/wrapper.py";
+  }
+  subgraph cluster_3 {
+    label="runtime"; fontname="DejaVu Sans"; fontsize=12; color="#D6E4F0"; style="rounded";
+    "codecache.py";
+    "aoti_runtime/model.h";
+    "aoti_runner/model_container_runner.cpp";
+  }
+  "AOTIModelContainerRunner";
+  "AOTInductorModelBase";
+  "CppKernel / CppScheduling";
+  "FxGraphCache / PyCodeCache";
+  "GraphLowering / codegen / init_wrapper_code";
+  "PythonWrapperCodegen";
+  "TritonKernel / TritonScheduling";
+  "TritonTemplate / AlgorithmSelectorCache";
+  "_compile_fx_inner / fw_compiler / bw_compiler";
+  "compile_fx / compile_fx_inner";
+  "dependencies / fusion / codegen";
+  "register_lowering / make_pointwise / make_reduction";
+  "compile_fx.py" -> "compile_fx / compile_fx_inner";
+  "compile_fx.py" -> "_compile_fx_inner / fw_compiler / bw_compiler";
+  "graph.py" -> "GraphLowering / codegen / init_wrapper_code";
+  "lowering.py" -> "register_lowering / make_pointwise / make_reduction";
+  "scheduler.py" -> "dependencies / fusion / codegen";
+  "select_algorithm.py" -> "TritonTemplate / AlgorithmSelectorCache";
+  "codegen/triton.py" -> "TritonKernel / TritonScheduling";
+  "codegen/cpp.py" -> "CppKernel / CppScheduling";
+  "codegen/wrapper.py" -> "PythonWrapperCodegen";
+  "codecache.py" -> "FxGraphCache / PyCodeCache";
+  "aoti_runtime/model.h" -> "AOTInductorModelBase";
+  "aoti_runner/model_container_runner.cpp" -> "AOTIModelContainerRunner";
+}

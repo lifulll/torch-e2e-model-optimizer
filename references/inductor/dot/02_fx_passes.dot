@@ -1,0 +1,23 @@
+digraph G {
+  graph [rankdir=LR, bgcolor=white, pad=0.25, nodesep=0.45, ranksep=0.65, splines=ortho];
+  node [shape=box, style="rounded,filled", fontname="DejaVu Sans", fontsize=13, fillcolor="#EEF5FF", color="#5B7DB1", margin="0.12,0.08"];
+  edge [color="#56606B", arrowsize=0.7, penwidth=1.2];
+  title [label="FX Passes and AOTAutograd", shape=box, fillcolor="#233142", fontcolor=white, color="#233142", fontsize=18];
+  title -> "Captured FX" [style=invis];
+  "Captured FX";
+  "GraphLowering";
+  "bw graph";
+  "fw graph";
+  "joint_graph_passes";
+  "partition_fn";
+  "post_grad_passes";
+  "pre_grad_passes";
+  "Captured FX" -> "pre_grad_passes";
+  "pre_grad_passes" -> "joint_graph_passes";
+  "joint_graph_passes" -> "partition_fn";
+  "partition_fn" -> "fw graph";
+  "partition_fn" -> "bw graph";
+  "fw graph" -> "post_grad_passes";
+  "bw graph" -> "post_grad_passes";
+  "post_grad_passes" -> "GraphLowering";
+}

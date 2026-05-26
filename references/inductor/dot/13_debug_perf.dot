@@ -1,0 +1,26 @@
+digraph G {
+  graph [rankdir=LR, bgcolor=white, pad=0.25, nodesep=0.45, ranksep=0.65, splines=ortho];
+  node [shape=box, style="rounded,filled", fontname="DejaVu Sans", fontsize=13, fillcolor="#EEF5FF", color="#5B7DB1", margin="0.12,0.08"];
+  edge [color="#56606B", arrowsize=0.7, penwidth=1.2];
+  title [label="Debug and Performance", shape=box, fillcolor="#233142", fontcolor=white, color="#233142", fontsize=18];
+  title -> "FX graph" [style=invis];
+  "FX graph";
+  "Slow model";
+  "generated code";
+  "graph breaks";
+  "lowering/fallback";
+  "model rewrite/config/custom kernel";
+  "profiler kernel";
+  "recompiles";
+  "scheduler fusion";
+  "separate compile/runtime";
+  "Slow model" -> "separate compile/runtime";
+  "separate compile/runtime" -> "graph breaks";
+  "graph breaks" -> "recompiles";
+  "recompiles" -> "FX graph";
+  "FX graph" -> "lowering/fallback";
+  "lowering/fallback" -> "scheduler fusion";
+  "scheduler fusion" -> "generated code";
+  "generated code" -> "profiler kernel";
+  "profiler kernel" -> "model rewrite/config/custom kernel";
+}

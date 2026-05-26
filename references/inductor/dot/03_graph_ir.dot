@@ -1,0 +1,31 @@
+digraph G {
+  graph [rankdir=LR, bgcolor=white, pad=0.25, nodesep=0.45, ranksep=0.65, splines=ortho];
+  node [shape=box, style="rounded,filled", fontname="DejaVu Sans", fontsize=13, fillcolor="#EEF5FF", color="#5B7DB1", margin="0.12,0.08"];
+  edge [color="#56606B", arrowsize=0.7, penwidth=1.2];
+  title [label="03 GraphLowering and IR", shape=box, fillcolor="#233142", fontcolor=white, color="#233142", fontsize=18];
+  title -> "Buffer/Operation" [style=invis];
+  subgraph cluster_0 {
+    label="interpreter"; fontname="DejaVu Sans"; fontsize=12; color="#D6E4F0"; style="rounded";
+    "FX Node";
+    "GraphLowering.run_node";
+    "run_node";
+    "call_function";
+  }
+  subgraph cluster_1 {
+    label="ir"; fontname="DejaVu Sans"; fontsize=12; color="#D6E4F0"; style="rounded";
+    "TensorBox";
+    "StorageBox";
+    "Pointwise/Reduction/View";
+    "Buffer/Operation";
+  }
+  "Scheduler";
+  "lowerings dict";
+  "FX Node" -> "GraphLowering.run_node";
+  "run_node" -> "call_function";
+  "call_function" -> "lowerings dict";
+  "lowerings dict" -> "TensorBox";
+  "TensorBox" -> "StorageBox";
+  "StorageBox" -> "Pointwise/Reduction/View";
+  "Pointwise/Reduction/View" -> "Buffer/Operation";
+  "Buffer/Operation" -> "Scheduler";
+}

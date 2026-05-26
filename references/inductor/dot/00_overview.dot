@@ -1,0 +1,35 @@
+digraph G {
+  graph [rankdir=LR, bgcolor=white, pad=0.25, nodesep=0.45, ranksep=0.65, splines=ortho];
+  node [shape=box, style="rounded,filled", fontname="DejaVu Sans", fontsize=13, fillcolor="#EEF5FF", color="#5B7DB1", margin="0.12,0.08"];
+  edge [color="#56606B", arrowsize=0.7, penwidth=1.2];
+  title [label="TorchInductor Book Overview", shape=box, fillcolor="#233142", fontcolor=white, color="#233142", fontsize=18];
+  title -> "AOTAutograd" [style=invis];
+  subgraph cluster_0 {
+    label="frontend"; fontname="DejaVu Sans"; fontsize=12; color="#D6E4F0"; style="rounded";
+    "torch.compile";
+    "Dynamo FX";
+    "AOTAutograd";
+  }
+  subgraph cluster_1 {
+    label="middle"; fontname="DejaVu Sans"; fontsize=12; color="#D6E4F0"; style="rounded";
+    "compile_fx";
+    "GraphLowering";
+    "Inductor IR";
+    "Scheduler";
+  }
+  subgraph cluster_2 {
+    label="backend"; fontname="DejaVu Sans"; fontsize=12; color="#D6E4F0"; style="rounded";
+    "Codegen";
+    "Runtime/Cache";
+    "AOTInductor";
+  }
+  "torch.compile" -> "Dynamo FX";
+  "Dynamo FX" -> "AOTAutograd";
+  "AOTAutograd" -> "compile_fx";
+  "compile_fx" -> "GraphLowering";
+  "GraphLowering" -> "Inductor IR";
+  "Inductor IR" -> "Scheduler";
+  "Scheduler" -> "Codegen";
+  "Codegen" -> "Runtime/Cache";
+  "Runtime/Cache" -> "AOTInductor";
+}

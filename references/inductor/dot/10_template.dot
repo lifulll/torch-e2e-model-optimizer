@@ -1,0 +1,28 @@
+digraph G {
+  graph [rankdir=LR, bgcolor=white, pad=0.25, nodesep=0.45, ranksep=0.65, splines=ortho];
+  node [shape=box, style="rounded,filled", fontname="DejaVu Sans", fontsize=13, fillcolor="#EEF5FF", color="#5B7DB1", margin="0.12,0.08"];
+  edge [color="#56606B", arrowsize=0.7, penwidth=1.2];
+  title [label="10 Template and Autotune", shape=box, fillcolor="#233142", fontcolor=white, color="#233142", fontsize=18];
+  title -> "AlgorithmSelectorCache" [style=invis];
+  "AlgorithmSelectorCache";
+  "CUTLASS/CK/CPP Template";
+  "ChoiceCaller";
+  "ExternKernelChoice";
+  "TritonTemplate";
+  "TritonTemplateCaller";
+  "benchmark";
+  "choices list";
+  "mm/conv lowering";
+  "precompile";
+  "selected output_node";
+  "mm/conv lowering" -> "choices list";
+  "choices list" -> "ExternKernelChoice";
+  "choices list" -> "TritonTemplate";
+  "choices list" -> "CUTLASS/CK/CPP Template";
+  "TritonTemplate" -> "TritonTemplateCaller";
+  "CUTLASS/CK/CPP Template" -> "ChoiceCaller";
+  "ChoiceCaller" -> "AlgorithmSelectorCache";
+  "AlgorithmSelectorCache" -> "precompile";
+  "precompile" -> "benchmark";
+  "benchmark" -> "selected output_node";
+}

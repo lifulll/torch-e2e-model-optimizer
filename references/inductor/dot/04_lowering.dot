@@ -1,0 +1,24 @@
+digraph G {
+  graph [rankdir=LR, bgcolor=white, pad=0.25, nodesep=0.45, ranksep=0.65, splines=ortho];
+  node [shape=box, style="rounded,filled", fontname="DejaVu Sans", fontsize=13, fillcolor="#EEF5FF", color="#5B7DB1", margin="0.12,0.08"];
+  edge [color="#56606B", arrowsize=0.7, penwidth=1.2];
+  title [label="Lowering Pipeline", shape=box, fillcolor="#233142", fontcolor=white, color="#233142", fontsize=18];
+  title -> "ATen OpOverload" [style=invis];
+  "ATen OpOverload";
+  "Extern/Fallback";
+  "Pointwise";
+  "Reduction";
+  "View";
+  "broadcast/type promotion";
+  "decomp/lowering fn";
+  "register_lowering";
+  "transform_args";
+  "ATen OpOverload" -> "register_lowering";
+  "register_lowering" -> "transform_args";
+  "transform_args" -> "broadcast/type promotion";
+  "broadcast/type promotion" -> "decomp/lowering fn";
+  "decomp/lowering fn" -> "Pointwise";
+  "decomp/lowering fn" -> "Reduction";
+  "decomp/lowering fn" -> "View";
+  "decomp/lowering fn" -> "Extern/Fallback";
+}

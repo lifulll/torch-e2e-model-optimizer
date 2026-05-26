@@ -1,0 +1,24 @@
+digraph G {
+  graph [rankdir=LR, bgcolor=white, pad=0.25, nodesep=0.45, ranksep=0.65, splines=ortho];
+  node [shape=box, style="rounded,filled", fontname="DejaVu Sans", fontsize=13, fillcolor="#EEF5FF", color="#5B7DB1", margin="0.12,0.08"];
+  edge [color="#56606B", arrowsize=0.7, penwidth=1.2];
+  title [label="14 Examples and Reading List", shape=box, fillcolor="#233142", fontcolor=white, color="#233142", fontsize=18];
+  title -> "benchmark verify" [style=invis];
+  "benchmark verify";
+  "debug env";
+  "generated wrapper";
+  "kernel source";
+  "map to FX node";
+  "rewrite experiment";
+  "source reading";
+  "tiny model";
+  "torch.compile";
+  "tiny model" -> "torch.compile";
+  "torch.compile" -> "debug env";
+  "debug env" -> "generated wrapper";
+  "generated wrapper" -> "kernel source";
+  "kernel source" -> "map to FX node";
+  "map to FX node" -> "source reading";
+  "source reading" -> "rewrite experiment";
+  "rewrite experiment" -> "benchmark verify";
+}

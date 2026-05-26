@@ -1,0 +1,27 @@
+digraph G {
+  graph [rankdir=LR, bgcolor=white, pad=0.25, nodesep=0.45, ranksep=0.65, splines=ortho];
+  node [shape=box, style="rounded,filled", fontname="DejaVu Sans", fontsize=13, fillcolor="#EEF5FF", color="#5B7DB1", margin="0.12,0.08"];
+  edge [color="#56606B", arrowsize=0.7, penwidth=1.2];
+  title [label="compile_fx Entry", shape=box, fillcolor="#233142", fontcolor=white, color="#233142", fontsize=18];
+  title -> "AOTAutograd" [style=invis];
+  "AOTAutograd";
+  "Dynamo graph";
+  "FxGraphCache";
+  "bw_compiler";
+  "compile_fx";
+  "compile_fx_inner";
+  "fw_compiler";
+  "fx_codegen_and_compile";
+  "pre_grad_passes";
+  "torch.compile";
+  "torch.compile" -> "Dynamo graph";
+  "Dynamo graph" -> "compile_fx";
+  "compile_fx" -> "pre_grad_passes";
+  "compile_fx" -> "AOTAutograd";
+  "AOTAutograd" -> "fw_compiler";
+  "AOTAutograd" -> "bw_compiler";
+  "fw_compiler" -> "compile_fx_inner";
+  "bw_compiler" -> "compile_fx_inner";
+  "compile_fx_inner" -> "FxGraphCache";
+  "FxGraphCache" -> "fx_codegen_and_compile";
+}

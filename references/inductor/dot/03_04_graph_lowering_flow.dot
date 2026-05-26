@@ -1,0 +1,46 @@
+digraph G {
+  graph [rankdir=LR, bgcolor=white, pad=0.25, nodesep=0.45, ranksep=0.65, splines=ortho];
+  node [shape=box, style="rounded,filled", fontname="DejaVu Sans", fontsize=13, fillcolor="#EEF5FF", color="#5B7DB1", margin="0.12,0.08"];
+  edge [color="#56606B", arrowsize=0.7, penwidth=1.2];
+  title [label="Graph Lowering to IR Flow", shape=box, fillcolor="#233142", fontcolor=white, color="#233142", fontsize=18];
+  title -> "broadcast/type promotion/layout" [style=invis];
+  subgraph cluster_0 {
+    label="graph.py"; fontname="DejaVu Sans"; fontsize=12; color="#D6E4F0"; style="rounded";
+    "graph.py GraphLowering.run";
+    "graph.py run_node";
+    "graph.py call_function";
+    "graph.py env value";
+    "graph.py output/fallback/realize";
+    "graph.py register_buffer";
+    "graph.py register_operation";
+  }
+  subgraph cluster_1 {
+    label="lowering.py"; fontname="DejaVu Sans"; fontsize=12; color="#D6E4F0"; style="rounded";
+    "lowering.py lowerings dict";
+    "lowering.py wrapped lowering";
+    "broadcast/type promotion/layout";
+    "op-specific lowering";
+  }
+  subgraph cluster_2 {
+    label="ir.py"; fontname="DejaVu Sans"; fontsize=12; color="#D6E4F0"; style="rounded";
+    "ir.py Pointwise/Reduction/View";
+    "ir.py Extern/Fallback/Template";
+    "ir.py TensorBox/StorageBox";
+    "ir.py StorageBox.realize";
+  }
+  "scheduler.py Scheduler";
+  "graph.py GraphLowering.run" -> "graph.py run_node";
+  "graph.py run_node" -> "graph.py call_function";
+  "graph.py call_function" -> "lowering.py lowerings dict";
+  "lowering.py lowerings dict" -> "lowering.py wrapped lowering";
+  "lowering.py wrapped lowering" -> "broadcast/type promotion/layout";
+  "broadcast/type promotion/layout" -> "op-specific lowering";
+  "op-specific lowering" -> "ir.py Pointwise/Reduction/View";
+  "op-specific lowering" -> "ir.py Extern/Fallback/Template";
+  "ir.py Pointwise/Reduction/View" -> "ir.py TensorBox/StorageBox";
+  "ir.py TensorBox/StorageBox" -> "graph.py env value";
+  "graph.py output/fallback/realize" -> "ir.py StorageBox.realize";
+  "ir.py StorageBox.realize" -> "graph.py register_buffer";
+  "ir.py StorageBox.realize" -> "graph.py register_operation";
+  "graph.py register_operation" -> "scheduler.py Scheduler";
+}

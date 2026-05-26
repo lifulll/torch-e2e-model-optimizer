@@ -1,0 +1,26 @@
+digraph G {
+  graph [rankdir=LR, bgcolor=white, pad=0.25, nodesep=0.45, ranksep=0.65, splines=ortho];
+  node [shape=box, style="rounded,filled", fontname="DejaVu Sans", fontsize=13, fillcolor="#EEF5FF", color="#5B7DB1", margin="0.12,0.08"];
+  edge [color="#56606B", arrowsize=0.7, penwidth=1.2];
+  title [label="09 Cpp CPU Codegen", shape=box, fillcolor="#233142", fontcolor=white, color="#233142", fontsize=18];
+  title -> "C++ source" [style=invis];
+  "C++ source";
+  "CPU SchedulerNode";
+  "CppCodeCache";
+  "CppKernel";
+  "CppScheduling";
+  "CppVecKernel";
+  "LoopNest";
+  "OpenMP/parallel";
+  "Vector ISA";
+  "WorkSharing";
+  "CPU SchedulerNode" -> "CppScheduling";
+  "CppScheduling" -> "CppKernel";
+  "CppKernel" -> "LoopNest";
+  "LoopNest" -> "WorkSharing";
+  "WorkSharing" -> "OpenMP/parallel";
+  "CppKernel" -> "CppVecKernel";
+  "CppVecKernel" -> "Vector ISA";
+  "Vector ISA" -> "C++ source";
+  "C++ source" -> "CppCodeCache";
+}

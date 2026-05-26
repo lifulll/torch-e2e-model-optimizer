@@ -1,0 +1,45 @@
+digraph G {
+  graph [rankdir=LR, bgcolor=white, pad=0.25, nodesep=0.45, ranksep=0.65, splines=ortho];
+  node [shape=box, style="rounded,filled", fontname="DejaVu Sans", fontsize=13, fillcolor="#EEF5FF", color="#5B7DB1", margin="0.12,0.08"];
+  edge [color="#56606B", arrowsize=0.7, penwidth=1.2];
+  title [label="IR to Scheduler Bridge", shape=box, fillcolor="#233142", fontcolor=white, color="#233142", fontsize=18];
+  title -> "ComputedBuffer/TemplateBuffer/ExternKernel" [style=invis];
+  subgraph cluster_0 {
+    label="from previous chapters"; fontname="DejaVu Sans"; fontsize=12; color="#D6E4F0"; style="rounded";
+    "lowering.py";
+    "ir.py TensorBox";
+    "StorageBox.realize";
+    "ComputedBuffer/TemplateBuffer/ExternKernel";
+    "GraphLowering.operations";
+  }
+  subgraph cluster_1 {
+    label="scheduler.py"; fontname="DejaVu Sans"; fontsize=12; color="#D6E4F0"; style="rounded";
+    "Scheduler(self.operations)";
+    "create_scheduler_node";
+    "SchedulerNode/ExternNode/NopNode";
+    "extract_read_writes";
+    "compute_dependencies";
+    "topological_sort";
+    "fusion";
+    "memory planning";
+  }
+  subgraph cluster_2 {
+    label="next chapter"; fontname="DejaVu Sans"; fontsize=12; color="#D6E4F0"; style="rounded";
+    "backend codegen";
+  }
+  "GraphLowering._update_scheduler";
+  "lowering.py" -> "ir.py TensorBox";
+  "ir.py TensorBox" -> "StorageBox.realize";
+  "StorageBox.realize" -> "ComputedBuffer/TemplateBuffer/ExternKernel";
+  "ComputedBuffer/TemplateBuffer/ExternKernel" -> "GraphLowering.operations";
+  "GraphLowering.operations" -> "GraphLowering._update_scheduler";
+  "GraphLowering._update_scheduler" -> "Scheduler(self.operations)";
+  "Scheduler(self.operations)" -> "create_scheduler_node";
+  "create_scheduler_node" -> "SchedulerNode/ExternNode/NopNode";
+  "SchedulerNode/ExternNode/NopNode" -> "extract_read_writes";
+  "extract_read_writes" -> "compute_dependencies";
+  "compute_dependencies" -> "topological_sort";
+  "topological_sort" -> "fusion";
+  "fusion" -> "memory planning";
+  "memory planning" -> "backend codegen";
+}

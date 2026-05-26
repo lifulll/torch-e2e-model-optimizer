@@ -1,0 +1,25 @@
+digraph G {
+  graph [rankdir=LR, bgcolor=white, pad=0.25, nodesep=0.45, ranksep=0.65, splines=ortho];
+  node [shape=box, style="rounded,filled", fontname="DejaVu Sans", fontsize=13, fillcolor="#EEF5FF", color="#5B7DB1", margin="0.12,0.08"];
+  edge [color="#56606B", arrowsize=0.7, penwidth=1.2];
+  title [label="07 Codegen Overview", shape=box, fillcolor="#233142", fontcolor=white, color="#233142", fontsize=18];
+  title -> "Compiled module" [style=invis];
+  "Compiled module";
+  "CppScheduling";
+  "Kernel source";
+  "PyCodeCache";
+  "ROCm/CUDA/XPU";
+  "Scheduler";
+  "Scheduling";
+  "TritonScheduling";
+  "WrapperCodegen";
+  "get_scheduling_for_device";
+  "Scheduler" -> "get_scheduling_for_device";
+  "get_scheduling_for_device" -> "TritonScheduling";
+  "get_scheduling_for_device" -> "CppScheduling";
+  "get_scheduling_for_device" -> "ROCm/CUDA/XPU";
+  "Scheduling" -> "Kernel source";
+  "Kernel source" -> "WrapperCodegen";
+  "WrapperCodegen" -> "PyCodeCache";
+  "PyCodeCache" -> "Compiled module";
+}

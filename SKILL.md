@@ -123,6 +123,7 @@ Do not enter the next step until the current step has no remaining material opti
 - `references/torch_compile_debugging.md`: load for graph breaks, recompilation, dynamic shapes, or compile-mode triage.
 - `references/compile_modes_shape_strategy.md`: load when selecting compile modes, CUDA graph strategy, bucketing, `mark_dynamic`, or dynamic-shape policy.
 - `references/distributed_compile_guidance.md`: load for DDP/FSDP, distributed graph breaks, gradient checkpointing, checkpoint boundaries, or rank-level validation.
+- `references/inductor/`: load this folder when TorchInductor internals, terminology, or source-level control flow are unclear; use it as the Inductor knowledge base.
 - `references/inductor_triton_playbook.md`: load only when generated code, fusion, layout, or Triton hotspots are implicated.
 - `references/inductor_triton_hop_development_flow.md`: load when replacing an FX subgraph with hand-written Triton kernels through `triton_kernel_wrapper_functional` HOP in the Inductor post-grad pipeline.
 - `references/reporting_contract.md`: load when finalizing or checking output completeness.

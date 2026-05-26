@@ -1,0 +1,26 @@
+digraph G {
+  graph [rankdir=LR, bgcolor=white, pad=0.25, nodesep=0.45, ranksep=0.65, splines=ortho];
+  node [shape=box, style="rounded,filled", fontname="DejaVu Sans", fontsize=13, fillcolor="#EEF5FF", color="#5B7DB1", margin="0.12,0.08"];
+  edge [color="#56606B", arrowsize=0.7, penwidth=1.2];
+  title [label="08 Triton Codegen", shape=box, fillcolor="#233142", fontcolor=white, color="#233142", fontsize=18];
+  title -> "FusedSchedulerNode" [style=invis];
+  "FusedSchedulerNode";
+  "IndexingOptions";
+  "IterationRanges";
+  "TritonKernel";
+  "TritonScheduling";
+  "X/Y/R blocks";
+  "compute CSE";
+  "heuristics/autotune";
+  "tl.load mask";
+  "tl.store/atomic";
+  "FusedSchedulerNode" -> "TritonScheduling";
+  "TritonScheduling" -> "TritonKernel";
+  "TritonKernel" -> "IterationRanges";
+  "IterationRanges" -> "X/Y/R blocks";
+  "X/Y/R blocks" -> "IndexingOptions";
+  "IndexingOptions" -> "tl.load mask";
+  "tl.load mask" -> "compute CSE";
+  "compute CSE" -> "tl.store/atomic";
+  "tl.store/atomic" -> "heuristics/autotune";
+}

@@ -1,0 +1,28 @@
+digraph G {
+  graph [rankdir=LR, bgcolor=white, pad=0.25, nodesep=0.45, ranksep=0.65, splines=ortho];
+  node [shape=box, style="rounded,filled", fontname="DejaVu Sans", fontsize=13, fillcolor="#EEF5FF", color="#5B7DB1", margin="0.12,0.08"];
+  edge [color="#56606B", arrowsize=0.7, penwidth=1.2];
+  title [label="Runtime Cache and CUDAGraph", shape=box, fillcolor="#233142", fontcolor=white, color="#233142", fontsize=18];
+  title -> "AsyncCompile" [style=invis];
+  "AsyncCompile";
+  "C++/GPU CodeCache";
+  "CUDA Graph checks";
+  "CompiledFxGraph";
+  "Generated source";
+  "PyCodeCache";
+  "compiled kernels";
+  "load module";
+  "post_compile";
+  "process pool";
+  "record/replay";
+  "shared object/cubin";
+  "Generated source" -> "PyCodeCache";
+  "Generated source" -> "C++/GPU CodeCache";
+  "PyCodeCache" -> "load module";
+  "C++/GPU CodeCache" -> "shared object/cubin";
+  "AsyncCompile" -> "process pool";
+  "process pool" -> "compiled kernels";
+  "CompiledFxGraph" -> "post_compile";
+  "post_compile" -> "CUDA Graph checks";
+  "CUDA Graph checks" -> "record/replay";
+}
