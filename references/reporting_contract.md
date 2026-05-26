@@ -11,6 +11,7 @@ Every `stepXX_*.md` file must include:
 - Exact command and environment differences.
 - Cleanup command and result before model runs.
 - Code/config files changed.
+- Patch archive path in `patches/`.
 - Correctness test and tolerance.
 - Before/after E2E metric.
 - Secondary metrics: memory, compile time, graph breaks, recompiles, top kernels.
@@ -41,6 +42,7 @@ Use `templates/iteration_row.md` when creating the table by hand.
 - retained changes,
 - rejected changes and why,
 - files modified,
+- patch files generated under `patches/`,
 - cleanup command used before model runs,
 - correctness status,
 - compile-time and memory impact,

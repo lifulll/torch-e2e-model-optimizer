@@ -78,6 +78,7 @@ Follow this loop exactly:
           - Codex picks one method or one controlled branch family
           - Codex writes code/config
           - run unit/equivalence tests and benchmark
+          - archive the scoped code diff into patches/
           - update stepXX_*.md and iteration_table.md
      c. enter the next step after this step has no remaining material optimization point
 4. emit final_summary.md
@@ -132,6 +133,7 @@ Do not enter the next step until the current step has no remaining material opti
 - `init_run.py`: create `run_YYYYMMDD_HHMMSS/`, step files, artifact folders, and `state.json`.
 - `run_with_cleanup.py`: execute the user-provided kill/cleanup command, then run the model command.
 - `analyze_torch_logs.py`: summarize `torch.compile` log signals.
+- `archive_changes.py`: save scoped code/config diffs, changed-file lists, and metadata into the run `patches/` directory.
 - `record_iteration.py`: append one measured result to `iteration_table.md` and `state.json`; use `--materiality-threshold` and `--noise-percent` when benchmark noise is known.
 - `summarize.py`: generate `final_summary.md`, including retained, rejected, sub-threshold, and trailing no-gain iteration counts.
 

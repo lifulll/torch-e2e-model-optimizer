@@ -83,6 +83,7 @@ while this step still has material optimization points:
   pick one method or one controlled branch family
   change code/config
   run cleanup command, then unit/equivalence tests and benchmark
+  archive scoped diff to patches/
   update stepXX_*.md
   append iteration_table.md
 stop this step when remaining ideas cannot plausibly beat the materiality threshold
@@ -111,6 +112,15 @@ python /home/torch-e2e-model-optimizer/scripts/record_iteration.py \
   --noise-percent 0.8 \
   --retained yes \
   --evidence "step01_model_code.md; artifacts/torch_logs/iter1_compile_summary.md"
+
+python /home/torch-e2e-model-optimizer/scripts/archive_changes.py \
+  --run-dir "$RUN_DIR" \
+  --repo . \
+  --iter 1 \
+  --layer model_code \
+  --decision retained \
+  --pathspec model.py \
+  --note "moved metric .item() outside compiled forward"
 ```
 
 Use `templates/step_summary.md` for each `stepXX_*.md`.
@@ -141,6 +151,16 @@ When two consecutive iterations show no material improvement, only sub-threshold
 python /home/torch-e2e-model-optimizer/scripts/summarize.py \
   --run-dir "$RUN_DIR" \
   --stop-reason "two no-gain iterations; remaining bottleneck is outside current scope"
+```
+
+Archive the final accepted diff:
+
+```bash
+python /home/torch-e2e-model-optimizer/scripts/archive_changes.py \
+  --run-dir "$RUN_DIR" \
+  --repo . \
+  --label final_retained \
+  --decision retained
 ```
 
 Use `templates/final_summary.md` for the final report shape. The final user-facing answer should report best retained command/config, total E2E speedup, correctness, files changed, remaining bottleneck, and the run directory.

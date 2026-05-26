@@ -18,15 +18,20 @@
 
 ## Retained Changes
 
-| File | Change | Evidence |
-|---|---|---|
-| | | |
+| File | Change | Evidence | Patch |
+|---|---|---|---|
+| | | | |
 
 ## Rejected Changes
 
-| Change | Reason |
-|---|---|
-| | |
+| Change | Reason | Patch |
+|---|---|---|
+| | | |
+
+## Patch Archive
+
+- Final retained patch:
+- Per-iteration patches:
 
 ## Remaining Bottleneck
 

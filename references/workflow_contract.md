@@ -36,6 +36,33 @@ python <skill>/scripts/init_run.py --root . --entry-cmd "<benchmark command>" --
 
 Every optimization step must update its `stepXX_*.md`, even when no change is retained.
 
+## Code Change Archive
+
+Every benchmarked code/config change must be archived under `patches/` before moving to the next hypothesis:
+
+```bash
+python <skill>/scripts/archive_changes.py \
+  --run-dir "$RUN_DIR" \
+  --repo . \
+  --iter 1 \
+  --layer model_code \
+  --decision retained \
+  --pathspec model.py \
+  --note "moved scalar sync out of compiled path"
+```
+
+Archive both retained and rejected attempts. Use `--pathspec` for the files owned by the current experiment so unrelated user changes are not swept into the patch. At finalization, create a final retained patch from the current accepted diff:
+
+```bash
+python <skill>/scripts/archive_changes.py --run-dir "$RUN_DIR" --repo . --label final_retained --decision retained
+```
+
+Each archive produces:
+
+- `<label>.patch`: scoped `git diff`,
+- `<label>.files.txt`: changed file list,
+- `<label>.json`: layer, decision, command, and note metadata.
+
 ## Measurement Protocol
 
 Before every comparison:
@@ -96,6 +123,7 @@ Each `stepXX_*.md` must include:
 - exact commands,
 - cleanup command and result,
 - files and code regions changed,
+- patch archive path,
 - correctness result and tolerance,
 - end-to-end performance before and after,
 - profiler or compiler evidence,
@@ -114,5 +142,6 @@ Write `final_summary.md` with:
 - correctness status,
 - table of all iterations,
 - retained and rejected changes,
+- patch files for retained and rejected changes,
 - remaining bottleneck and stop reason,
 - risks, version constraints, and follow-up options.
